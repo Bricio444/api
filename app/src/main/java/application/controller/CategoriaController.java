@@ -1,9 +1,18 @@
 package application.controller;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframewgork.http.HttpStatus;
+import org.springframewgork.web.bind.annotation.DeleteMapping;
+import org.springframewgork.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframewgork.web.bind.annotation.PostMapping;
+import org.springframewgork.web.bind.annotation.PutMapping;
+import org.springframewgork.web.bind.annotation.RequestBody;
 import org.springframewgork.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframewgork.web.bind.annotation.ResponseStatusException;
 import application.repository.CategoriaRepository;
 
 @RestController
@@ -14,6 +23,46 @@ public class CategoriaController {
     @GetMappin
     public Interable <categorias> getAll() {
         return categoriaRepo.findAll();
+    }
+    @GetMapping("/{id}")
+    public Categoria getOne(@PathVariable long id) {
+        Optional<Categoria> result = categoriaRepo.findById(id);
+        if(result.isEmpty()) {
+            throw new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Categoria Não Encontrada"
+            );
+        }
+        return result.get();
+    }
+
+    @PostMapping
+    private Categoria post(@RequestBody Categoria categoria) {
+        return categoriaRepo.save(categoria);
+    }
+
+    @PutMapping("/{id}")
+    private Categoria put(@RequestBody Categoria categoria, @PathVariable long id) {
+        Optional<Categoria> result = categoriaRepo.findById(id);
+
+        if(result.isEmpty()) {
+            throw new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Categoria Não Encontrada"
+            );
+        }
+
+        result.get().setNome(categoria.getNome());
+        return categoriaRepo.save(result.get());
+    }
+
+    @DeleteMapping("/{id}")
+    private void delete(@PathVariable long id) {
+        if(categoriaRepo.existsById(id)) {
+            categoriaRepo.deleteById(id);
+        } else {
+            throw new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Categoria Não Encontrada"
+            );
+        }
     }
     
 }
